@@ -26,7 +26,7 @@ public func decodeNBT(data: Data) throws -> (name: StringTag, tag: NBTTag, lengt
 }
 
 public extension NBTTag {
-    func tagData(withName name: StringTag) throws -> Data {
+    func encode(withName name: StringTag) throws -> Data {
         guard let typeId = NBTTags.first(where: { $0.value == Self.self })?.key else {
             throw NBTError.unrecognizedTagType(Self.self)
         }

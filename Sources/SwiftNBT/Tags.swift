@@ -4,6 +4,7 @@ public enum NBTError: Error {
     case endOfData
     case unrecognizedTagTypeId(UInt8)
     case unrecognizedTagType(NBTTag.Type)
+    case mismatchedListTagType(expected: NBTTag.Type, actual: NBTTag.Type)
 }
 
 public protocol NBTTag {
@@ -156,6 +157,10 @@ public struct ListTag: NBTTag {
     public func tagData() throws -> Data {
         guard let typeId = NBTTags.first(where: { $0.value == type })?.key else {
             throw NBTError.unrecognizedTagType(type)
+        }
+        
+        if let tag = tags.first(where: { Swift.type(of: $0) != type }) {
+            throw NBTError.mismatchedListTagType(expected: type, actual: Swift.type(of: tag))
         }
         
         var data = Data([typeId]) + Int32(tags.count).tagData()

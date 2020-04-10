@@ -7,7 +7,7 @@ import Foundation
 import SwiftNBT
 
 let tag = StringTag(string: "Hello, world!")
-let data = try! tag.tagData(withName: "str")
+let data = try! tag.encode(withName: "str")
 
 let decodeResult = try! decodeNBT(data: data)
 print(decodeResult.tag)
