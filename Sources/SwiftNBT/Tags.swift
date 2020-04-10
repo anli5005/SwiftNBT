@@ -302,31 +302,3 @@ extension CompoundTag {
         }
     }
 }
-
-public func decode(data: Data) throws -> (name: StringTag, tag: NBTTag, length: Int) {
-    if data.isEmpty {
-        throw NBTError.endOfData
-    }
-    
-    guard let type = NBTTags[data.first!] else {
-        throw NBTError.unrecognizedTagTypeId(data.first!)
-    }
-    
-    var length = 0
-    let name = try StringTag(data: data[(data.startIndex + 1)..<data.endIndex], length: &length)
-    length += 1
-    
-    var tagLength = 0
-    let tag = try type.init(data: data[(data.startIndex + length)..<data.endIndex], length: &tagLength)
-    length += tagLength
-    
-    return (name: name, tag: tag, length: length)
-}
-
-public func encode<Tag: NBTTag>(tag: Tag, with name: StringTag) throws -> Data {
-    guard let typeId = NBTTags.first(where: { $0.value == Tag.self })?.key else {
-        throw NBTError.unrecognizedTagType(Tag.self)
-    }
-    
-    return try Data([typeId]) + name.tagData() + tag.tagData()
-}

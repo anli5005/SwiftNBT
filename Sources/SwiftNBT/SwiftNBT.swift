@@ -5,6 +5,36 @@ import Gzip
 import Combine
 #endif */
 
+public func decodeNBT(data: Data) throws -> (name: StringTag, tag: NBTTag, length: Int) {
+    if data.isEmpty {
+        throw NBTError.endOfData
+    }
+    
+    guard let type = NBTTags[data.first!] else {
+        throw NBTError.unrecognizedTagTypeId(data.first!)
+    }
+    
+    var length = 0
+    let name = try StringTag(data: data[(data.startIndex + 1)..<data.endIndex], length: &length)
+    length += 1
+    
+    var tagLength = 0
+    let tag = try type.init(data: data[(data.startIndex + length)..<data.endIndex], length: &tagLength)
+    length += tagLength
+    
+    return (name: name, tag: tag, length: length)
+}
+
+public extension NBTTag {
+    func tagData(withName name: StringTag) throws -> Data {
+        guard let typeId = NBTTags.first(where: { $0.value == Self.self })?.key else {
+            throw NBTError.unrecognizedTagType(Self.self)
+        }
+    
+        return try Data([typeId]) + name.tagData() + tagData()
+    }
+}
+
 public extension Data {
     func gunzippedIfNeeded() -> Data {
         if isGzipped {
